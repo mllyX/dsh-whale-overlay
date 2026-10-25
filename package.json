@@ -1,0 +1,33 @@
+{
+  "name": "dsh-whale-overlay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "把 DSH 余额小鲸鱼挂件（dsh-whale-widget）放到整个桌面上活动：透明置顶全屏悬浮窗（独立 Electron 助手进程），拖拽/吸附/泡泡/音效/余额全保留；桌面模式一键开关，并可抑制 DSH 界面内的挂件副本",
+  "type": "module",
+  "main": "lib/index.js",
+  "icon": "./assets/icon.png",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "assets",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": []
+    }
+  },
+  "engines": {
+    "node": ">=22.19"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,9 @@
+# dsh-whale-overlay bundle patch: mounts the host row.
+# 浏览器半区（侧栏「桌面鲸鱼」控制卡）通过 package.json 的 `dsh.client`
+# 声明、由宿主客户端模块系统加载。
+# ⚠ 本 bundle 必须排在 dsh-whale-widget 之后加载（profile package.json 的
+#   dsh.profile.bundles 顺序），这样 index-inject 过滤与 tapIndex 剥除
+#   才会在 whale 的注入之后执行（后订阅后执行，抑制才能"赢"）。
+- insert:
+    - id: dsh-whale-overlay
+      name: dsh-whale-overlay

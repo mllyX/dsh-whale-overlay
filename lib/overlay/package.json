@@ -1,0 +1,7 @@
+{
+  "name": "dsh-whale-overlay-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Desktop overlay window app for dsh-whale-overlay (launched by the DSH host plugin)",
+  "main": "main.cjs"
+}

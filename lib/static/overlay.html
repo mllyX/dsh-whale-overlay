@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>桌面鲸鱼</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+  }
+</style>
+</head>
+<body>
+<!--
+  挂件启动闸门（whale-widget.js 的 dshwIsChatRoot）只要求 #root 内存在
+  textarea / contenteditable / [data-composer-input] 之一，不检查可见性。
+  这个隐藏的假根让同一份挂件代码在裸承载页里原样初始化。
+-->
+<div id="root" style="display:none" aria-hidden="true"><textarea tabindex="-1" aria-hidden="true"></textarea></div>
+<script src="/dsh-whale-overlay/overlay-glue.js"></script>
+</body>
+</html>

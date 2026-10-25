@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>桌面鲸鱼 · 设置</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --fg: #1c2333;
+    --muted: #67708a;
+    --card: #f5f7fb;
+    --line: #dde3ef;
+    --accent: #4d6bfe;
+    --ok: #1a9e5c;
+    --warn: #c77700;
+    --err: #d64545;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #171a21;
+      --fg: #e8ebf2;
+      --muted: #9aa3b8;
+      --card: #1f242e;
+      --line: #2c3340;
+      --accent: #7d95ff;
+      --ok: #37c97e;
+      --warn: #e5a63c;
+      --err: #ef6b6b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 20px 22px 36px;
+    background: var(--bg); color: var(--fg);
+    font: 13.5px/1.55 system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
+  }
+  h1 { font-size: 17px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 12px; margin-bottom: 16px; }
+  section {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;
+  }
+  section h2 { font-size: 13px; margin: 0 0 10px; color: var(--muted); font-weight: 600; letter-spacing: .04em; }
+  .row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px dashed var(--line); }
+  .row:first-of-type { border-top: none; }
+  .row .label { flex: 1; min-width: 0; }
+  .row .label b { display: block; font-size: 13px; font-weight: 600; }
+  .row .label span { color: var(--muted); font-size: 12px; }
+  .row .ctl { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
+  select, input[type=range] { accent-color: var(--accent); }
+  select {
+    background: var(--bg); color: var(--fg);
+    border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font: inherit;
+  }
+  .switch { position: relative; width: 40px; height: 22px; flex: 0 0 auto; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; inset: 0; cursor: pointer; border-radius: 22px;
+    background: var(--line); transition: background .15s;
+  }
+  .slider::before {
+    content: ""; position: absolute; width: 16px; height: 16px; border-radius: 50%;
+    left: 3px; top: 3px; background: #fff; transition: transform .15s; box-shadow: 0 1px 3px rgba(0,0,0,.3);
+  }
+  .switch input:checked + .slider { background: var(--accent); }
+  .switch input:checked + .slider::before { transform: translateX(18px); }
+  .btns { display: flex; gap: 10px; margin-top: 4px; }
+  button {
+    font: inherit; padding: 7px 16px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  .status-line { display: flex; gap: 8px; align-items: baseline; padding: 3px 0; font-size: 12.5px; }
+  .status-line .k { color: var(--muted); flex: 0 0 118px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-right: 6px; }
+  .dot.ok { background: var(--ok); }
+  .dot.warn { background: var(--warn); }
+  .dot.err { background: var(--err); }
+  pre.log {
+    margin: 8px 0 0; padding: 8px 10px; max-height: 150px; overflow: auto;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    font: 11.5px/1.5 Consolas, monospace; white-space: pre-wrap; word-break: break-all; color: var(--muted);
+  }
+  .hint { font-size: 12px; color: var(--warn); margin-top: 6px; display: none; }
+  .hint.show { display: block; }
+  #savebar { position: sticky; bottom: 0; padding-top: 10px; background: linear-gradient(transparent, var(--bg) 30%); }
+  .saved { color: var(--ok); font-size: 12px; align-self: center; opacity: 0; transition: opacity .2s; }
+  .saved.show { opacity: 1; }
+</style>
+</head>
+<body>
+<h1>🐋 桌面鲸鱼 · 设置</h1>
+<div class="sub">dsh-whale-overlay —— 让 DSH 余额小鲸鱼挂件悬浮在整个桌面上（透明置顶悬浮窗，由 dsh-whale-widget 提供挂件本体）</div>
+
+<section>
+  <h2>桌面模式</h2>
+  <div class="row">
+    <div class="label"><b>启用桌面悬浮鲸鱼</b><span>开启后随 DSH 启动一个覆盖全屏的透明悬浮窗，鲸鱼浮在所有应用之上</span></div>
+    <div class="ctl"><label class="switch"><input type="checkbox" id="enabled"><span class="slider"></span></label></div>
+  </div>
+  <div class="row">
+    <div class="label"><b>隐藏 DSH 界面内的挂件副本</b><span>避免"双鲸鱼"与双重提示音；改动需重启 DSH 生效（界面内挂件由启动时注入决定）</span></div>
+    <div class="ctl"><label class="switch"><input type="checkbox" id="suppressInApp"><span class="slider"></span></label></div>
+  </div>
+  <div class="hint" id="restartHint">⚠ 当前改动涉及界面内挂件抑制状态，重启 DeepSeek Harness 后才会完全生效。</div>
+</section>
+
+<section>
+  <h2>悬浮窗</h2>
+  <div class="row">
+    <div class="label"><b>覆盖范围</b><span>主显示器，或全部显示器并集（跨屏漫游）</span></div>
+    <div class="ctl"><select id="display">
+      <option value="primary">主显示器</option>
+      <option value="all">全部显示器</option>
+    </select></div>
+  </div>
+  <div class="row">
+    <div class="label"><b>置顶档位</b><span>screen-saver 高于几乎一切窗口；off 不置顶</span></div>
+    <div class="ctl"><select id="alwaysOnTop">
+      <option value="screen-saver">最高（screen-saver）</option>
+      <option value="normal">普通置顶（normal）</option>
+      <option value="off">不置顶（off）</option>
+    </select></div>
+  </div>
+  <div class="row">
+    <div class="label"><b>不透明度</b><span>整窗透明度（0.3 ~ 1）</span></div>
+    <div class="ctl">
+      <input type="range" id="opacity" min="0.3" max="1" step="0.05">
+      <span id="opacityVal" style="width:34px;text-align:right">100%</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="label"><b>全局热键 Ctrl+Alt+W</b><span>一键显示 / 隐藏悬浮鲸鱼（全屏游戏/演示时可快速藏起）</span></div>
+    <div class="ctl"><label class="switch"><input type="checkbox" id="hotkeyEnabled"><span class="slider"></span></label></div>
+  </div>
+  <div class="row">
+    <div class="label"><b>硬件加速</b><span>若悬浮窗出现黑底/花屏，关闭此项后点「保存并重启悬浮窗」</span></div>
+    <div class="ctl"><label class="switch"><input type="checkbox" id="hardwareAcceleration"><span class="slider"></span></label></div>
+  </div>
+</section>
+
+<section>
+  <h2>状态</h2>
+  <div class="status-line"><span class="k">悬浮窗</span><span><span class="dot" id="dotOverlay"></span><span id="stOverlay">-</span></span></div>
+  <div class="status-line"><span class="k">桌面组件</span><span><span class="dot" id="dotHelper"></span><span id="stHelper">-</span></span></div>
+  <div class="status-line"><span class="k">鲸鱼挂件</span><span><span class="dot" id="dotWidget"></span><span id="stWidget">-</span></span></div>
+  <div class="status-line"><span class="k">安装任务</span><span><span class="dot" id="dotInstall"></span><span id="stInstall">-</span></span></div>
+  <pre class="log" id="logBox" style="display:none"></pre>
+  <div class="btns" style="margin-top:10px">
+    <button id="installBtn">安装 / 修复桌面组件</button>
+    <button id="restartOverlayBtn">保存并重启悬浮窗</button>
+  </div>
+</section>
+
+<div class="btns" id="savebar">
+  <button class="primary" id="saveBtn">保存</button>
+  <button id="resetBtn">放弃更改</button>
+  <span class="saved" id="savedFlag">已保存 ✔</span>
+</div>
+
+<script>
+(function () {
+  var API = '/dsh-whale-overlay'
+  var els = {}
+  ;['enabled','suppressInApp','display','alwaysOnTop','opacity','opacityVal','hotkeyEnabled','hardwareAcceleration',
+    'restartHint','saveBtn','resetBtn','savedFlag','installBtn','restartOverlayBtn',
+    'dotOverlay','stOverlay','dotHelper','stHelper','dotWidget','stWidget','dotInstall','stInstall','logBox']
+    .forEach(function (id) { els[id] = document.getElementById(id) })
+
+  var state = null
+  var savedConfig = null
+  var pollTimer = null
+
+  function readForm() {
+    return {
+      enabled: els.enabled.checked,
+      suppressInApp: els.suppressInApp.checked,
+      display: els.display.value,
+      alwaysOnTop: els.alwaysOnTop.value,
+      opacity: Math.round(parseFloat(els.opacity.value) * 100) / 100,
+      hotkeyEnabled: els.hotkeyEnabled.checked,
+      hardwareAcceleration: els.hardwareAcceleration.checked,
+    }
+  }
+
+  function fillForm(cfg) {
+    els.enabled.checked = !!cfg.enabled
+    els.suppressInApp.checked = cfg.suppressInApp !== false
+    els.display.value = cfg.display === 'all' ? 'all' : 'primary'
+    els.alwaysOnTop.value = ['normal','off'].indexOf(cfg.alwaysOnTop) >= 0 ? cfg.alwaysOnTop : 'screen-saver'
+    els.opacity.value = String(cfg.opacity)
+    els.opacityVal.textContent = Math.round(cfg.opacity * 100) + '%'
+    els.hotkeyEnabled.checked = cfg.hotkeyEnabled !== false
+    els.hardwareAcceleration.checked = cfg.hardwareAcceleration !== false
+  }
+
+  function setDot(el, cls) { el.className = 'dot' + (cls ? ' ' + cls : '') }
+
+  function fmtUptime(ms) {
+    if (!ms || ms < 0) return ''
+    var s = Math.floor(ms / 1000)
+    if (s < 60) return s + ' 秒'
+    var m = Math.floor(s / 60)
+    if (m < 60) return m + ' 分钟'
+    return Math.floor(m / 60) + ' 小时 ' + (m % 60) + ' 分'
+  }
+
+  function renderState() {
+    if (!state) return
+    var o = state.overlay || {}
+    if (o.running) {
+      setDot(els.dotOverlay, o.ready ? 'ok' : 'warn')
+      els.stOverlay.textContent = (o.ready ? '运行中' : '启动中…') + ' · pid ' + o.pid + ' · 已运行 ' + fmtUptime(o.uptimeMs)
+    } else {
+      setDot(els.dotOverlay, state.config.enabled ? 'err' : '')
+      els.stOverlay.textContent = state.config.enabled ? ('未运行' + (o.lastError ? '：' + o.lastError : '')) : '已停用'
+    }
+    var h = state.helper || {}
+    setDot(els.dotHelper, h.installed ? 'ok' : 'warn')
+    els.stHelper.textContent = h.installed ? ('Electron ' + (h.electronVersion || '?') + ' · ' + h.dir) : ('未安装（目录 ' + h.dir + '）')
+    var w = state.widget || {}
+    setDot(els.dotWidget, w.detected ? 'ok' : 'err')
+    els.stWidget.textContent = w.detected ? 'dsh-whale-widget 已检测到' : '未找到 dsh-whale-widget 插件'
+    var ins = state.install || {}
+    setDot(els.dotInstall, ins.status === 'done' ? 'ok' : ins.status === 'error' ? 'err' : ins.status === 'running' ? 'warn' : '')
+    els.stInstall.textContent = ({ idle: '空闲', running: '进行中…', done: '完成', error: '失败' })[ins.status] || ins.status
+    var log = (o.lastError ? '【悬浮窗】' + o.lastError + '\n' : '') +
+      (o.logTail ? '【悬浮窗日志】\n' + o.logTail + '\n' : '') +
+      (ins.logTail ? '【安装日志】\n' + ins.logTail : '')
+    els.logBox.style.display = log ? '' : 'none'
+    els.logBox.textContent = log
+    els.installBtn.disabled = ins.status === 'running'
+    els.restartHint.classList.toggle('show', !!state.restartNeededForSuppress)
+  }
+
+  function load() {
+    fetch(API + '/state.json', { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null })
+      .then(function (s) {
+        if (!s || !s.ok) return
+        var first = !state
+        state = s
+        if (first || !dirty()) { savedConfig = s.config; fillForm(s.config) }
+        renderState()
+      })
+      .catch(function () {})
+  }
+
+  function dirty() {
+    if (!savedConfig) return false
+    var f = readForm()
+    for (var k in f) { if (f[k] !== savedConfig[k]) return true }
+    return false
+  }
+
+  function save(extra) {
+    var body = readForm()
+    if (extra) for (var k in extra) body[k] = extra[k]
+    els.saveBtn.disabled = true
+    fetch(API + '/config.json', {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+      .then(function (r) { return r.json() })
+      .then(function (d) {
+        if (d && d.ok) {
+          savedConfig = d.config
+          fillForm(d.config)
+          els.savedFlag.classList.add('show')
+          setTimeout(function () { els.savedFlag.classList.remove('show') }, 1600)
+        } else {
+          alert('保存失败：' + ((d && d.error) || '未知错误'))
+        }
+      })
+      .catch(function (e) { alert('保存失败：' + e) })
+      .finally(function () { els.saveBtn.disabled = false; load() })
+  }
+
+  els.saveBtn.addEventListener('click', function () { save() })
+  els.resetBtn.addEventListener('click', function () { if (savedConfig) fillForm(savedConfig) })
+  els.opacity.addEventListener('input', function () {
+    els.opacityVal.textContent = Math.round(parseFloat(els.opacity.value) * 100) + '%'
+  })
+  els.installBtn.addEventListener('click', function () {
+    fetch(API + '/install-helper', { method: 'POST', credentials: 'same-origin' })
+      .then(function (r) { return r.json() })
+      .then(function () { load() })
+      .catch(function (e) { alert('触发安装失败：' + e) })
+  })
+  els.restartOverlayBtn.addEventListener('click', function () {
+    // 先保存，再走一次关→开，让悬浮窗进程以新配置重启。
+    var body = readForm()
+    fetch(API + '/config.json', { method: 'PUT', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(Object.assign({}, body, { enabled: false })) })
+      .then(function (r) { return r.json() })
+      .then(function () {
+        return fetch(API + '/config.json', { method: 'PUT', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(Object.assign({}, body, { enabled: true })) })
+      })
+      .then(function () { setTimeout(load, 1200) })
+      .catch(function (e) { alert('重启悬浮窗失败：' + e) })
+  })
+
+  load()
+  pollTimer = setInterval(load, 4000)
+  window.addEventListener('beforeunload', function () { try { clearInterval(pollTimer) } catch (e) {} })
+})()
+</script>
+</body>
+</html>
