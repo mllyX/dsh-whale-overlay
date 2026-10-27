@@ -15,13 +15,14 @@ DSH 宿主进程（本插件 host 半区）
  │               ① 首航加载 connection.authenticatedUrl 签发的根 URL → 换取会话 cookie
  │               ② 跳转 /dsh-whale-overlay/overlay.html（裸承载页，隐藏假 #root 过挂件闸门）
  │               ③ 播种 dshw-last-seq 后注入 /dsh-whale/widget.js（挂件原样初始化）
- │               ④ 默认整窗点击穿透；glue 命中 dshwv-* 元素时经 IPC 关闭穿透
+ │               ④ 默认整窗点击穿透；glue 周期上报鲸鱼元素矩形，主进程以
+ │                  50ms 原生光标轮询判定命中后关闭穿透（无系统级鼠标钩子）
  ├─ 崩溃退避重启（2s/10s/60s，连续 5 次快速失败进 crash-loop 错误态）
  └─ 桌面模式开启时抑制 GUI 内挂件副本：
      · 桌面壳：过滤 webserver/index-inject 结构化注入行（重启 DSH 后生效）
      · 浏览器：tapIndex 剥掉 widget.js 的 <script> 标签
 DSH GUI（本插件 client 半区）
- └─ 侧栏「🐋 桌面鲸鱼」控制卡：桌面模式开关 / 状态 / 设置入口 / 组件安装
+ └─ 侧栏「🐋 桌面鲸鱼」控制卡（紧凑可折叠）：标题行常驻 状态点+开关，点击展开 状态/设置/安装；折叠偏好记忆，默认收起少占界面
 ```
 
 ## 控制入口
@@ -73,6 +74,8 @@ pnpm install
 - **模态遮罩**：挂件的编辑器（用量记录、泡泡编辑等）自带半透明全屏遮罩，在桌面模式下会罩住整屏 —— 属其固有模态交互，关闭编辑器即恢复。
 - **位置记忆**：悬浮窗有自己独立的 localStorage（`$DSH_HOME/whale-overlay/userdata`），桌面位置与 GUI 内位置互不干扰。
 - **鉴权**：悬浮窗每次由宿主拉起时都用新签发的启动令牌换取会话 cookie；cookie 失效（超过 maxAgeDays）时悬浮窗自动退出，由宿主用新令牌重拉。
+- **性能（v0.1.1 修复）**：早期版本用 `setIgnoreMouseEvents(true, {forward:true})` 做命中测试，它依赖 WH_MOUSE_LL 系统级鼠标钩子，全屏每次鼠标移动都流经悬浮窗进程，实测导致整个系统（含 DSH）点击/输入明显延迟。现已改为：渲染进程周期上报鲸鱼元素矩形，主进程 50ms 轮询 `screen.getCursorScreenPoint()` 判定命中 —— 零钩子、对系统输入零侵入。命中切换最多有 ~50ms 延迟（人无感知）。
+- **命中精度（v0.1.2 修复）**：挂件有大量 `pointer-events:none` 的大尺寸容器（`.dshwv-root` 可达 625px 见方），仅按包围盒判定会把大片屏幕误判为鲸鱼区域、吞掉 DSH 的点击。现在矩形收集按 computed style（pointer-events/visibility/opacity）过滤，且主进程激活交互前先向页面发 probe、由 `elementFromPoint` 像素级确认，未命中走指数退避冷却，杜绝"激活-释放"抖动。
 
 ## 文件布局
 
@@ -80,9 +83,9 @@ pnpm install
 lib/index.js            宿主半区：路由/配置/围栏/子进程生命周期/注入抑制
 lib/client.js           GUI 半区：侧栏控制卡（__ModuleLoader__ 纯 DOM）
 lib/overlay/main.cjs    悬浮窗 Electron 主进程
-lib/overlay/preload.cjs contextBridge：命中测试 → 点击穿透切换
+lib/overlay/preload.cjs contextBridge：矩形上报 / 诊断上报通道
 lib/static/overlay.html 裸承载页（隐藏假 #root + glue）
-lib/static/overlay-glue.js  seq 播种 + widget.js 注入 + 命中测试桥
+lib/static/overlay-glue.js  seq 播种 + widget.js 注入 + 命中矩形上报
 lib/static/settings.html    设置页
 assets/icon.png         插件/托盘图标
 scripts/make-icon.py    图标生成脚本（Pillow）
